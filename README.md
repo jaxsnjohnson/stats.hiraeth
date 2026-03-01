@@ -17,7 +17,9 @@ Static, single-page web app for creating, previewing, sharing, and printing cust
   - Regional Effects
 - Markdown-style links in text fields (`[text](URL)`)
 - Clickable dice notation in rendered text (for example, `2d6+3`) with roll modal
-- URL-backed state sharing
+- Hybrid state model:
+  - URL snapshot sharing (`v=2&s=...`)
+  - Local draft autosave in `localStorage`
 - View-only and embed link modes
 - Print-friendly output
 - Light/dark theme toggle with persisted preference
@@ -44,16 +46,17 @@ Using a local server can make clipboard and browser behavior more predictable th
 
 1. Fill out the form fields in the editor.
 2. Click **Apply Changes** to re-render the stat block preview.
-3. Click **Update URL** to encode current state into the query string.
+3. Click **Share Snapshot** to generate/copy a compact share URL.
 4. Use:
+   - **Copy Readable Link** for human-readable query parameters
    - **Copy View-Only Link** for a read-only shared page
    - **Copy Embed Link** for minimal embedded output
 5. Click **Print** for paper/PDF output.
-6. Click **Clear** to reset inputs and URL state.
+6. Click **Clear** to reset inputs, URL state, and local draft.
 
 ## Query Parameters
 
-The app reads/writes URL query parameters as its data model.
+The app reads URL query parameters as shareable state and keeps in-progress edits in local draft storage.
 
 ### Mode parameters
 
@@ -64,7 +67,12 @@ The app reads/writes URL query parameters as its data model.
 
 ### Content parameters
 
-Most content parameters map directly to form fields (for example: `name`, `ac`, `hp`, `cr`, `desc`, `source`, etc.).
+Preferred snapshot format:
+
+- `v=2`: snapshot schema version
+- `s=<base64url-json>`: compact encoded full stat block state
+
+Legacy readable links are still supported. Most content parameters map directly to form fields (for example: `name`, `ac`, `hp`, `cr`, `desc`, `source`, etc.).
 
 Dynamic list sections are stored as JSON arrays in query values. Each item uses:
 
@@ -110,7 +118,8 @@ If you fork this repository:
 - Core JavaScript responsibilities in `index.html` include:
   - Form -> data extraction and data -> form hydration
   - Rendering stat block sections
-  - Query-string encode/decode and URL updates
+  - Snapshot encode/decode and backward-compatible readable URL decode
+  - Local draft autosave/load/clear
   - View/embed mode handling
   - Dice parsing and modal roll display
   - Clipboard link generation
