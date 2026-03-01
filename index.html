@@ -946,14 +946,19 @@
           /\[([^\]]+)\]\(([^)]+)\)/g,
           '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
         );
-        str = str.replace(
-          /(\(?\d+d\d+(\s*[+-]\s*\d+)?\)?)|\d+d\d+/g,
-          (match) => {
-            const dice = match.replace(/[()]/g, "");
-            return `<span class="dice-roll" data-dice="${dice}">${match}</span>`;
-          }
-        );
-        return str;
+        const diceRegex = /(\(?\d+d\d+(\s*[+-]\s*\d+)?\)?)/g;
+        return str
+          .split(/(<[^>]+>)/g)
+          .map((segment) => {
+            if (segment.startsWith("<") && segment.endsWith(">")) {
+              return segment;
+            }
+            return segment.replace(diceRegex, (match) => {
+              const dice = match.replace(/[()]/g, "").replace(/\s+/g, "");
+              return `<span class="dice-roll" data-dice="${dice}">${match}</span>`;
+            });
+          })
+          .join("");
       }
       const DEBUG =
         new URLSearchParams(window.location.search).get("debug") === "1";
